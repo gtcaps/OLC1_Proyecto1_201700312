@@ -21,3 +21,5 @@ class TipoToken(Enum):
     AND = 18
     OR = 19 
     PALABRA_RESERVADA = 20
+    NUMERO_ENTERO = 21
+    NUMERO_DECIMAL = 22

@@ -45,6 +45,10 @@ class Token:
             return "Or"
         elif self.tipoToken is TipoToken.PALABRA_RESERVADA:
             return "Palabra Reservada"
+        elif self.tipoToken is TipoToken.NUMERO_ENTERO:
+            return "Numero Entero"
+        elif self.tipoToken is TipoToken.NUMERO_DECIMAL:
+            return "Numero Decimal"
         else:
             return "AND"
 
