@@ -1,5 +1,5 @@
 from AnalizadorLexicoJS.Token import *
-import re
+import os
 
 class AnalizadorLexicoJS:
 
@@ -8,21 +8,21 @@ class AnalizadorLexicoJS:
         self.listaErrores = []
         self.estado = 0
         self.lexema = ""
-        self.palabrasReservadas = ["var","console","log","for","while","do","continue","break","return","constructor","this","pow","true","false"]
+        self.palabrasReservadas = ["var","console","log","for","while","do","continue","break","return","constructor","this","pow","true","false", "if", "else"]
 
-    def agregarToken(self, tipoToken):
+    def __agregarToken(self, tipoToken):
         self.listaTokens.append(Token(tipoToken, self.lexema))
         self.estado = 0
         self.lexema = ""
     #END
 
-    def agregarErrorLexico(self, mensaje):
+    def __agregarErrorLexico(self, mensaje):
         self.listaErrores.append(mensaje)
         self.estado = 0
         self.lexema = ""
     #END
 
-    def analizar(self, cadena):
+    def analizarCadena(self, cadena):
         cadenaEntrada = cadena + "#"
         i = 0
 
@@ -39,64 +39,66 @@ class AnalizadorLexicoJS:
                     self.estado = 2
                 elif caracterActual == '=':
                     self.lexema += caracterActual
-                    self.agregarToken(TipoToken.IGUAL)
+                    self.__agregarToken(TipoToken.IGUAL)
                 elif caracterActual == '*':
                     self.lexema += caracterActual
-                    self.agregarToken(TipoToken.POR)
+                    self.__agregarToken(TipoToken.POR)
                 elif caracterActual == ';':
                     self.lexema += caracterActual
-                    self.agregarToken(TipoToken.PUNTO_Y_COMA)
+                    self.__agregarToken(TipoToken.PUNTO_Y_COMA)
                 elif caracterActual == '.':
                     self.lexema += caracterActual
-                    self.agregarToken(TipoToken.PUNTO)
+                    self.__agregarToken(TipoToken.PUNTO)
                 elif caracterActual == '/':
                     self.lexema += caracterActual
-                    self.agregarToken(TipoToken.DIVISION)
+                    self.__agregarToken(TipoToken.DIVISION)
                 elif caracterActual == '+':
                     self.lexema += caracterActual
-                    self.agregarToken(TipoToken.MAS)
+                    self.__agregarToken(TipoToken.MAS)
                 elif caracterActual == '(':
                     self.lexema += caracterActual
-                    self.agregarToken(TipoToken.PARENTESIS_IZQ)
+                    self.__agregarToken(TipoToken.PARENTESIS_IZQ)
                 elif caracterActual == ')':
                     self.lexema += caracterActual
-                    self.agregarToken(TipoToken.PARENTESIS_DER)
+                    self.__agregarToken(TipoToken.PARENTESIS_DER)
                 elif caracterActual == '{':
                     self.lexema += caracterActual
-                    self.agregarToken(TipoToken.LLAVE_IZQ)
+                    self.__agregarToken(TipoToken.LLAVE_IZQ)
                 elif caracterActual == '}':
                     self.lexema += caracterActual
-                    self.agregarToken(TipoToken.LLAVE_DER)
+                    self.__agregarToken(TipoToken.LLAVE_DER)
                 elif caracterActual == '-':
                     self.lexema += caracterActual
-                    self.agregarToken(TipoToken.MENOS)
+                    self.__agregarToken(TipoToken.MENOS)
                 elif caracterActual == '!':
                     self.lexema += caracterActual
-                    self.agregarToken(TipoToken.EXCLAMACION)
+                    self.__agregarToken(TipoToken.EXCLAMACION)
                 elif caracterActual == '<':
                     self.lexema += caracterActual
-                    self.agregarToken(TipoToken.MENOR)
+                    self.__agregarToken(TipoToken.MENOR)
                 elif caracterActual == '>':
                     self.lexema += caracterActual
-                    self.agregarToken(TipoToken.MAYOR)
+                    self.__agregarToken(TipoToken.MAYOR)
                 elif caracterActual == '&':
                     self.lexema += caracterActual
-                    self.agregarToken(TipoToken.AND)
+                    self.__agregarToken(TipoToken.AND)
                 elif caracterActual == '|':
                     self.lexema += caracterActual
-                    self.agregarToken(TipoToken.OR)
+                    self.__agregarToken(TipoToken.OR)
                 else:
                     if caracterActual == '#':
                         print(">>>>>>>>>>>> Fin del Analisis Lexico <<<<<<<<<<<<<")
+                    else:
+                        self.__agregarErrorLexico("El caracter {} no es reconocido dentro del lenguaje".format(caracterActual))
             elif self.estado == 1:
                 if caracterActual.isalpha() or caracterActual.isdigit():
                     self.estado = 1
                     self.lexema += caracterActual
                 else:
                     if self.lexema in self.palabrasReservadas:
-                        self.agregarToken(TipoToken.PALABRA_RESERVADA)
+                        self.__agregarToken(TipoToken.PALABRA_RESERVADA)
                     else:
-                        self.agregarToken(TipoToken.IDENTIFICADOR)
+                        self.__agregarToken(TipoToken.IDENTIFICADOR)
                     i -= 1
             elif self.estado == 2:
                 if caracterActual.isdigit():
@@ -106,28 +108,35 @@ class AnalizadorLexicoJS:
                     self.estado = 3
                     self.lexema += caracterActual
                 else:
-                    self.agregarToken(TipoToken.NUMERO_ENTERO)
+                    self.__agregarToken(TipoToken.NUMERO_ENTERO)
                     i -= 1
             elif self.estado == 3:
                 if caracterActual.isdigit():
                     self.estado = 4
                     self.lexema += caracterActual
                 else:
-                    self.agregarErrorLexico("Error Lexico: En el token {} se esperaba un digito y venia {}".format(self.lexema, caracterActual))
+                    self.__agregarErrorLexico("Error Lexico: En el token {} se esperaba un digito y venia {}".format(self.lexema, caracterActual))
                     i -= 1
             elif self.estado == 4:
                 if caracterActual.isdigit():
                     self.estado = 4
                     self.lexema += caracterActual
                 else:
-                    self.agregarToken(TipoToken.NUMERO_DECIMAL)
+                    self.__agregarToken(TipoToken.NUMERO_DECIMAL)
                     i -= 1
 
 
 
             i += 1 
-
     #END
+
+    def analizarArchivo(self, ruta):  
+        if os.path.isfile(ruta):
+            archivo = open(ruta, "r")
+            self.analizarCadena(archivo.read())
+            archivo.close()
+
+        
 
     def imprimirTokens(self):
         for token in self.listaTokens:
