@@ -37,6 +37,9 @@ class AnalizadorLexicoJS:
                 elif caracterActual.isdigit(): #SI ES DIGITO
                     self.lexema += caracterActual
                     self.estado = 2
+                elif caracterActual == '"':
+                    self.lexema += caracterActual
+                    self.estado = 5
                 elif caracterActual == '=':
                     self.lexema += caracterActual
                     self.__agregarToken(TipoToken.IGUAL)
@@ -124,7 +127,13 @@ class AnalizadorLexicoJS:
                 else:
                     self.__agregarToken(TipoToken.NUMERO_DECIMAL)
                     i -= 1
-
+            elif self.estado == 5:
+                if caracterActual == '"':
+                    self.lexema += caracterActual
+                    self.__agregarToken(TipoToken.CADENA)
+                else:
+                    self.estado = 5
+                    self.lexema += caracterActual
 
 
             i += 1 
