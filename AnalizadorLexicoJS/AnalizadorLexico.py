@@ -40,6 +40,9 @@ class AnalizadorLexicoJS:
                 elif caracterActual == '"':
                     self.lexema += caracterActual
                     self.estado = 5
+                elif caracterActual == '\'':
+                    self.lexema += caracterActual
+                    self.estado = 6
                 elif caracterActual == '=':
                     self.lexema += caracterActual
                     self.__agregarToken(TipoToken.IGUAL)
@@ -134,7 +137,20 @@ class AnalizadorLexicoJS:
                 else:
                     self.estado = 5
                     self.lexema += caracterActual
-
+            elif self.estado == 6:
+                if caracterActual == '\'':
+                    self.lexema += caracterActual
+                    self.__agregarToken(TipoToken.CARACTER)
+                else:
+                    self.lexema += caracterActual
+                    self.estado = 7
+            elif self.estado == 7:
+                if caracterActual == '\'':
+                    self.lexema += caracterActual
+                    self.__agregarToken(TipoToken.CARACTER)
+                else:
+                    self.__agregarErrorLexico("Error Lexico: En el token {} se esperaba una comilla simple y venia {}".format(self.lexema, caracterActual))
+                    
 
             i += 1 
     #END
