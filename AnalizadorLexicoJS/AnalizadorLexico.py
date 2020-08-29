@@ -94,6 +94,9 @@ class AnalizadorLexicoJS:
                 else:
                     if caracterActual == '#':
                         print(">>>>>>>>>>>> Fin del Analisis Lexico <<<<<<<<<<<<<")
+                    elif caracterActual in (' ','\n','\t'):
+                        self.estado = 0
+                        self.lexema = ""
                     else:
                         self.__agregarErrorLexico("El caracter {} no es reconocido dentro del lenguaje".format(caracterActual))
             elif self.estado == 1:
