@@ -49,6 +49,10 @@ class Token:
             return "Numero Entero"
         elif self.tipoToken is TipoToken.NUMERO_DECIMAL:
             return "Numero Decimal"
+        elif self.tipoToken is TipoToken.DOS_PUNTOS:
+            return "Dos Puntos"
+        elif self.tipoToken is TipoToken.COMA:
+            return "Coma"
         else:
             return "AND"
 
