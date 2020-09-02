@@ -57,7 +57,7 @@ class AnalizadorLexicoJS:
                     self.__agregarToken(TipoToken.PUNTO)
                 elif caracterActual == '/':
                     self.lexema += caracterActual
-                    self.__agregarToken(TipoToken.DIVISION)
+                    self.estado = 7
                 elif caracterActual == '+':
                     self.lexema += caracterActual
                     self.__agregarToken(TipoToken.MAS)
@@ -76,6 +76,9 @@ class AnalizadorLexicoJS:
                 elif caracterActual == '-':
                     self.lexema += caracterActual
                     self.__agregarToken(TipoToken.MENOS)
+                elif caracterActual == ',':
+                    self.lexema += caracterActual
+                    self.__agregarToken(TipoToken.COMA)
                 elif caracterActual == '!':
                     self.lexema += caracterActual
                     self.__agregarToken(TipoToken.EXCLAMACION)
@@ -88,11 +91,14 @@ class AnalizadorLexicoJS:
                 elif caracterActual == '&':
                     self.lexema += caracterActual
                     self.__agregarToken(TipoToken.AND)
+                elif caracterActual == ':':
+                    self.lexema += caracterActual
+                    self.__agregarToken(TipoToken.DOS_PUNTOS)
                 elif caracterActual == '|':
                     self.lexema += caracterActual
                     self.__agregarToken(TipoToken.OR)
                 else:
-                    if caracterActual == '#':
+                    if caracterActual == '#' and i == (len(cadenaEntrada) - 1):
                         print(">>>>>>>>>>>> Fin del Analisis Lexico <<<<<<<<<<<<<")
                     elif caracterActual in (' ','\n','\t'):
                         self.estado = 0
@@ -100,7 +106,7 @@ class AnalizadorLexicoJS:
                     else:
                         self.__agregarErrorLexico("El caracter {} no es reconocido dentro del lenguaje".format(caracterActual))
             elif self.estado == 1:
-                if caracterActual.isalpha() or caracterActual.isdigit():
+                if caracterActual.isalpha() or caracterActual.isdigit() or caracterActual == '_':
                     self.estado = 1
                     self.lexema += caracterActual
                 else:
@@ -146,13 +152,43 @@ class AnalizadorLexicoJS:
                     self.__agregarToken(TipoToken.CARACTER)
                 else:
                     self.lexema += caracterActual
-                    self.estado = 7
+                    self.estado = 6
             elif self.estado == 7:
-                if caracterActual == '\'':
+                if caracterActual == '/':
                     self.lexema += caracterActual
-                    self.__agregarToken(TipoToken.CARACTER)
+                    self.estado = 8
+                elif caracterActual == '*':
+                    self.lexema += caracterActual
+                    self.estado = 10
                 else:
-                    self.__agregarErrorLexico("Error Lexico: En el token {} se esperaba una comilla simple y venia {}".format(self.lexema, caracterActual))
+                    self.__agregarToken(TipoToken.DIVISION)
+                    i -= 1
+            elif self.estado == 8:
+                if caracterActual == '\n' or i == (len(cadenaEntrada) - 1):
+                    # COMENTARIO DE UNA LINEA
+                    print("ESTE ES UN COMENTARIO DE UNA LINEA => " + self.lexema)
+                    self.lexema = ""
+                    self.estado = 0
+                else:
+                    self.lexema += caracterActual
+                    self.estado = 8
+            elif self.estado == 9:
+                if caracterActual == '*':
+                    self.lexema += caracterActual
+                    self.estado = 10
+                else:
+                    self.lexema += caracterActual
+                    self.estado = 9
+            elif self.estado == 10:
+                if caracterActual == '/':
+                    #COMENTARIO MULTILINEA
+                    print("ESTE ES UN COMENTARIO MULTILINEA => \n" + self.lexema)
+                    self.lexema = ""
+                    self.estado = 0
+                else:
+                    self.lexema += caracterActual
+                    self.estado = 9
+
                     
 
             i += 1 
