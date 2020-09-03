@@ -8,10 +8,12 @@ class AnalizadorLexicoJS:
         self.listaErrores = []
         self.estado = 0
         self.lexema = ""
+        self.linea = 1
+        self.columna = 1
         self.palabrasReservadas = ["var","console","log","for","while","do","continue","break","return","constructor","this","pow","true","false", "if", "else"]
 
     def __agregarToken(self, tipoToken):
-        self.listaTokens.append(Token(tipoToken, self.lexema))
+        self.listaTokens.append(Token(tipoToken, self.lexema, self.linea, self.columna))
         self.estado = 0
         self.lexema = ""
     #END
@@ -24,83 +26,108 @@ class AnalizadorLexicoJS:
 
     def analizarCadena(self, cadena):
         cadenaEntrada = cadena + "#"
+        col = 0
         i = 0
 
         while i < len(cadenaEntrada):
             caracterActual = cadenaEntrada[i]
-
+            
+            if caracterActual == '\n':
+                self.linea += 1
+                col = 0
 
             if self.estado == 0:
                 if caracterActual.isalpha(): #SI ES LETRA
                     self.lexema += caracterActual
                     self.estado = 1
+                    self.columna = col
                 elif caracterActual.isdigit(): #SI ES DIGITO
                     self.lexema += caracterActual
                     self.estado = 2
+                    self.columna = col
                 elif caracterActual == '"':
                     self.lexema += caracterActual
                     self.estado = 5
+                    self.columna = col
                 elif caracterActual == '\'':
                     self.lexema += caracterActual
                     self.estado = 6
+                    self.columna = col
                 elif caracterActual == '=':
+                    self.columna = col
                     self.lexema += caracterActual
                     self.__agregarToken(TipoToken.IGUAL)
                 elif caracterActual == '*':
+                    self.columna = col
                     self.lexema += caracterActual
                     self.__agregarToken(TipoToken.POR)
                 elif caracterActual == ';':
+                    self.columna = col
                     self.lexema += caracterActual
                     self.__agregarToken(TipoToken.PUNTO_Y_COMA)
                 elif caracterActual == '.':
+                    self.columna = col
                     self.lexema += caracterActual
                     self.__agregarToken(TipoToken.PUNTO)
                 elif caracterActual == '/':
                     self.lexema += caracterActual
                     self.estado = 7
                 elif caracterActual == '+':
+                    self.columna = col
                     self.lexema += caracterActual
                     self.__agregarToken(TipoToken.MAS)
                 elif caracterActual == '(':
+                    self.columna = col
                     self.lexema += caracterActual
                     self.__agregarToken(TipoToken.PARENTESIS_IZQ)
                 elif caracterActual == ')':
+                    self.columna = col
                     self.lexema += caracterActual
                     self.__agregarToken(TipoToken.PARENTESIS_DER)
                 elif caracterActual == '{':
+                    self.columna = col
                     self.lexema += caracterActual
                     self.__agregarToken(TipoToken.LLAVE_IZQ)
                 elif caracterActual == '}':
+                    self.columna = col
                     self.lexema += caracterActual
                     self.__agregarToken(TipoToken.LLAVE_DER)
                 elif caracterActual == '-':
+                    self.columna = col
                     self.lexema += caracterActual
                     self.__agregarToken(TipoToken.MENOS)
                 elif caracterActual == ',':
+                    self.columna = col
                     self.lexema += caracterActual
                     self.__agregarToken(TipoToken.COMA)
                 elif caracterActual == '!':
+                    self.columna = col
                     self.lexema += caracterActual
                     self.__agregarToken(TipoToken.EXCLAMACION)
                 elif caracterActual == '<':
+                    self.columna = col
                     self.lexema += caracterActual
                     self.__agregarToken(TipoToken.MENOR)
                 elif caracterActual == '>':
+                    self.columna = col
                     self.lexema += caracterActual
                     self.__agregarToken(TipoToken.MAYOR)
                 elif caracterActual == '&':
+                    self.columna = col
                     self.lexema += caracterActual
                     self.__agregarToken(TipoToken.AND)
                 elif caracterActual == ':':
+                    self.columna = col
                     self.lexema += caracterActual
                     self.__agregarToken(TipoToken.DOS_PUNTOS)
                 elif caracterActual == '|':
+                    self.columna = col
                     self.lexema += caracterActual
                     self.__agregarToken(TipoToken.OR)
                 else:
                     if caracterActual == '#' and i == (len(cadenaEntrada) - 1):
                         print(">>>>>>>>>>>> Fin del Analisis Lexico <<<<<<<<<<<<<")
-                    elif caracterActual in (' ','\n','\t'):
+                    elif caracterActual in ('\n',' ', '\t'):
                         self.estado = 0
                         self.lexema = ""
                     else:
@@ -192,6 +219,7 @@ class AnalizadorLexicoJS:
                     
 
             i += 1 
+            col += 1
     #END
 
     def analizarArchivo(self, ruta):  

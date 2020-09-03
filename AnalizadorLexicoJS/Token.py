@@ -2,9 +2,11 @@ from AnalizadorLexicoJS.TipoToken import TipoToken
 
 class Token:
 
-    def __init__(self, tipoToken, lexema):
+    def __init__(self, tipoToken, lexema, linea, columna):
         self.tipoToken = tipoToken
         self.lexema = lexema
+        self.linea = linea
+        self.columna = columna
 
     def getTipo(self):
         if self.tipoToken is TipoToken.IDENTIFICADOR:
