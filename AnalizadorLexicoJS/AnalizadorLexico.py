@@ -1,5 +1,6 @@
 from AnalizadorLexicoJS.Token import *
 import os
+import subprocess
 
 class AnalizadorLexicoJS:
 
@@ -186,7 +187,7 @@ class AnalizadorLexicoJS:
                     self.estado = 8
                 elif caracterActual == '*':
                     self.lexema += caracterActual
-                    self.estado = 10
+                    self.estado = 9
                 else:
                     self.__agregarToken(TipoToken.DIVISION)
                     i -= 1
@@ -242,6 +243,54 @@ class AnalizadorLexicoJS:
             print("\n\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
             print(error)
             print(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
+    #END
+
+    def generarReporteErrores(self):
+        file = open("reportes/erroresjs.html", "w")
+        file.write("<!DOCTYPE html>\n<html>\n")
+        file.write("<head>\n")
+        file.write("    <meta charset=\"UTF-8\">\n")
+        file.write("    <title>Reporte de Errores</title>\n")
+        file.write("    <style>")
+        file.write("        *{margin:0; padding:0; box-sizing: border-box;}\n")
+        file.write("        h1{text-align: center; margin: 30px 0;}\n")
+        file.write("        table{border-collapse: collapse; margin: 0 auto; width: 40%;}\n")
+        file.write("        td, th{border: 1px solid black; padding: 10px;}\n")
+        file.write("       th{background: black; color: white}\n")
+        file.write("    </style>\n")
+        file.write("</head>\n")
+        file.write("<body>\n")
+        file.write("    <h1>Reporte de Errores Lexicos </h1>\n")
+        file.write("    <table>\n")
+        file.write("        <thead>\n")
+        file.write("            <tr>\n")
+        file.write("                <th>#</th>\n")
+        file.write("                <th>Error</th>\n")
+        file.write("            </tr>\n")
+        file.write("        </thead>\n")
+        file.write("        <tbody>")
+
+        if len(self.listaErrores) is not 0:
+            i = 1
+            for error in self.listaErrores:
+                file.write("            <tr>")
+                file.write("                <td>{}</td>".format(i))
+                file.write("                <td>{}</td>".format(error))
+                file.write("            </tr>")
+                i += 1
+        else:
+            file.write("            <tr>")
+            file.write("                <td>0</td>")
+            file.write("                <td>El archivo no tiene errores lexico :D</td>")
+            file.write("            </tr>")
+
+        file.write("        </tbody>")
+        file.write("    </table>\n")
+        file.write("</body>\n")
+        file.write("</html>")
+        file.close()
+
+        os.system("start ./reportes/erroresjs.html")
     #END
     
 
