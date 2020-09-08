@@ -260,7 +260,13 @@ class AnalizadorLexicoJS:
             print(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
     #END
 
+    def __verificarDirectorioReportes(self):
+        if not os.path.isdir("reportes/"):
+            os.mkdir("reportes/")
+
     def generarReporteErrores(self):
+        self.__verificarDirectorioReportes()
+
         file = open("reportes/erroresjs.html", "w")
         file.write("<!DOCTYPE html>\n<html>\n")
         file.write("<head>\n")
@@ -309,7 +315,7 @@ class AnalizadorLexicoJS:
     #END
 
     def generarReporteArbol(self):
-        
+        self.__verificarDirectorioReportes()
         file = open("reportes/arboljs.dot", "w")
         file.write("digraph G{\n")
         file.write("    rankdir=LR;\n")
