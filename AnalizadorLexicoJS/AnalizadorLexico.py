@@ -1,6 +1,7 @@
 from AnalizadorLexicoJS.Token import *
 import os
-import subprocess
+import re
+import pathlib
 
 class AnalizadorLexicoJS:
 
@@ -223,6 +224,7 @@ class AnalizadorLexicoJS:
                 if caracterActual == '/':
                     #COMENTARIO MULTILINEA
                     print("ESTE ES UN COMENTARIO MULTILINEA => \n" + self.lexema)
+                    self.lexema += caracterActual
                     self.entradaLimpia += self.lexema
                     self.lexema = ""
                     self.estado = 0
@@ -243,8 +245,23 @@ class AnalizadorLexicoJS:
             archivo = open(ruta, "r")
             self.analizarCadena(archivo.read())
             archivo.close()
+    #END
 
-        
+    def crearArchivoLimpio(self, nombre_archivo):
+        patron = r'([a-zA-Z]:\\)(\w+\\)+'
+        ruta = re.search(patron, self.entradaLimpia)
+        ruta = ruta.group()
+
+        ruta = re.sub(r'[a-zA-Z]:\\','',ruta)
+        ruta = ruta.replace("user\\","")
+        pathlib.Path(ruta).mkdir(parents=True, exist_ok=True)
+
+        file = open(".\\" + ruta + nombre_archivo, "w")
+        file.write(self.entradaLimpia)
+        file.close()
+
+    #END
+
 
     def imprimirTokens(self):
         for token in self.listaTokens:
