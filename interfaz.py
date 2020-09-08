@@ -124,6 +124,7 @@ def jsAnalizador():
     analizadorJS.analizarCadena(editor_texto.get("1.0",END))
     analizadorJS.generarReporteErrores()
     analizadorJS.generarReporteArbol()
+    analizadorJS.crearArchivoLimpio(label_nombre_archivo.cget("text"))
 
     for token in analizadorJS.listaTokens:
         consola.insert(END, "=====================================================\n")
