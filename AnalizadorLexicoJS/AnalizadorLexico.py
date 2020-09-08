@@ -7,6 +7,8 @@ class AnalizadorLexicoJS:
     def __init__(self):
         self.listaTokens = []
         self.listaErrores = []
+        self.__tknsGrafica = []
+        self.entradaLimpia = ""
         self.estado = 0
         self.lexema = ""
         self.linea = 1
@@ -14,9 +16,15 @@ class AnalizadorLexicoJS:
         self.palabrasReservadas = ["var","console","log","for","while","do","continue","break","return","constructor","this","pow","true","false", "if", "else"]
 
     def __agregarToken(self, tipoToken):
-        self.listaTokens.append(Token(tipoToken, self.lexema, self.linea, self.columna))
+        token = Token(tipoToken, self.lexema, self.linea, self.columna)
+        self.entradaLimpia += self.lexema
+        self.listaTokens.append(token)
         self.estado = 0
         self.lexema = ""
+        
+
+        if token.getTipo() not in self.__tknsGrafica and token.getTipo() != "Palabra Reservada":
+            self.__tknsGrafica.append(token.getTipo())
     #END
 
     def __agregarErrorLexico(self, mensaje):
@@ -38,7 +46,7 @@ class AnalizadorLexicoJS:
                 col = 0
 
             if self.estado == 0:
-                if caracterActual.isalpha(): #SI ES LETRA
+                if caracterActual.isalpha() or caracterActual == '_': #SI ES LETRA
                     self.lexema += caracterActual
                     self.estado = 1
                     self.columna = col
@@ -131,6 +139,7 @@ class AnalizadorLexicoJS:
                     elif caracterActual in ('\n',' ', '\t'):
                         self.estado = 0
                         self.lexema = ""
+                        self.entradaLimpia += caracterActual
                     else:
                         self.__agregarErrorLexico("El caracter {} no es reconocido dentro del lenguaje".format(caracterActual))
             elif self.estado == 1:
@@ -195,8 +204,11 @@ class AnalizadorLexicoJS:
                 if caracterActual == '\n' or i == (len(cadenaEntrada) - 1):
                     # COMENTARIO DE UNA LINEA
                     print("ESTE ES UN COMENTARIO DE UNA LINEA => " + self.lexema)
+                    self.entradaLimpia += self.lexema
                     self.lexema = ""
                     self.estado = 0
+                    if "Comentario Unilinea" not in self.__tknsGrafica:
+                        self.__tknsGrafica.append("Comentario Unilinea")
                 else:
                     self.lexema += caracterActual
                     self.estado = 8
@@ -211,8 +223,11 @@ class AnalizadorLexicoJS:
                 if caracterActual == '/':
                     #COMENTARIO MULTILINEA
                     print("ESTE ES UN COMENTARIO MULTILINEA => \n" + self.lexema)
+                    self.entradaLimpia += self.lexema
                     self.lexema = ""
                     self.estado = 0
+                    if "Comentario Multilinea" not in self.__tknsGrafica:
+                        self.__tknsGrafica.append("Comentario Multilinea")
                 else:
                     self.lexema += caracterActual
                     self.estado = 9
@@ -270,7 +285,7 @@ class AnalizadorLexicoJS:
         file.write("        </thead>\n")
         file.write("        <tbody>")
 
-        if len(self.listaErrores) is not 0:
+        if len(self.listaErrores) != 0:
             i = 1
             for error in self.listaErrores:
                 file.write("            <tr>")
@@ -291,6 +306,82 @@ class AnalizadorLexicoJS:
         file.close()
 
         os.system("start ./reportes/erroresjs.html")
+    #END
+
+    def generarReporteArbol(self):
+        
+        file = open("reportes/arboljs.dot", "w")
+        file.write("digraph G{\n")
+        file.write("    rankdir=LR;\n")
+        file.write("    node[shape=circle];\n")
+        file.write("    node0[label=\"0\"];\n")
+
+        i = 1
+        for tkn in self.__tknsGrafica:
+            if tkn == "Identificador":
+                file.write("    node{0}[shape=\"doublecircle\", label=\"{0} - ID\"];\n".format(i))
+                file.write("    node0->node{}[label=\"{}\"];\n".format(i,"Letra | _"))
+                file.write("    node{0}->node{0}[label=\"{1}\"];\n".format(i,"Letra | Digito | _"))
+            elif tkn == "Cadena":
+                file.write("    node{0}[label=\"{0}\"];\n".format(i))
+                file.write("    node0->node{}[label=\"{}\"];\n".format(i,"\\\""))
+                file.write("    node{0}->node{0}[label=\"{1}\"];\n".format(i,"*"))
+                i += 1
+                file.write("    node{0}[shape=\"doublecircle\", label=\"{0} - Cadena\"];\n".format(i))
+                file.write("    node{}->node{}[label=\"{}\"];\n".format(i-1,i,"\\\""))
+            elif tkn == "Caracter":
+                file.write("    node{0}[label=\"{0}\"];\n".format(i))
+                file.write("    node0->node{}[label=\"{}\"];\n".format(i,"\\'"))
+                file.write("    node{0}->node{0}[label=\"{1}\"];\n".format(i,"*"))
+                i += 1
+                file.write("    node{0}[shape=\"doublecircle\", label=\"{0} - Caracter\"];\n".format(i))
+                file.write("    node{}->node{}[label=\"{}\"];\n".format(i-1,i,"\\'"))
+            elif tkn == "Numero Entero":
+                file.write("    node{0}[shape=\"doublecircle\", label=\"{0} - Entero\"];\n".format(i))
+                file.write("    node0->node{}[label=\"{}\"];\n".format(i,"Digito"))
+                file.write("    node{0}->node{0}[label=\"{1}\"];\n".format(i,"Digito"))
+            elif tkn == "Numero Decimal":
+                file.write("    node{0}[label=\"{0}\"];\n".format(i))
+                file.write("    node0->node{}[label=\"{}\"];\n".format(i,"Digito"))
+                file.write("    node{0}->node{0}[label=\"{1}\"];\n".format(i,"Digito"))
+                i += 1
+                file.write("    node{0}[shape=\"doublecircle\", label=\"{0} - Decimal\"];\n".format(i))
+                file.write("    node{}->node{}[label=\"{}\"];\n".format(i-1,i,"Punto"))
+                file.write("    node{0}->node{0}[label=\"{1}\"];\n".format(i,"Digito"))
+            elif tkn == "Comentario Unilinea":
+                file.write("    node{0}[label=\"{0}\"]\n".format(i))
+                file.write("    node0->node{}[label=\"{}\"];\n".format(i,"/"))
+                i += 1
+                file.write("    node{0}[label=\"{0}\"]\n".format(i))
+                file.write("    node{}->node{}[label=\"{}\"];\n".format(i-1,i,"/"))
+                file.write("    node{0}->node{0}[label=\"{1}\"];\n".format(i,"*"))
+                i += 1
+                file.write("    node{0}[shape=\"doublecircle\", label=\"{0} - Coment Uni\"]\n".format(i))
+                file.write("    node{}->node{}[label=\"{}\"];\n".format(i-1,i,"\\\\n"))
+            elif tkn == "Comentario Multilinea":
+                file.write("    node{0}[label=\"{0}\"]\n".format(i))
+                file.write("    node0->node{}[label=\"{}\"];\n".format(i,"/"))
+                i += 1
+                file.write("    node{0}[label=\"{0}\"]\n".format(i))
+                file.write("    node{}->node{}[label=\"{}\"];\n".format(i-1,i,"(*)"))
+                file.write("    node{0}->node{0}[label=\"{1}\"];\n".format(i,"*"))
+                i += 1
+                file.write("    node{0}[label=\"{0}\"]\n".format(i))
+                file.write("    node{}->node{}[label=\"{}\"];\n".format(i-1,i,"(*)"))
+                i += 1
+                file.write("    node{0}[shape=\"doublecircle\", label=\"{0} - Coment Multi\"]\n".format(i))
+                file.write("    node{}->node{}[label=\"{}\"];\n".format(i-1,i,"/"))
+            else:
+                file.write("    node{0}[shape=\"doublecircle\", label=\"{0}\"];\n".format(i))
+                file.write("    node0->node{}[label=\"{}\"];\n".format(i,tkn))
+            i += 1
+
+        file.write("}")
+        file.close()
+
+        os.system("dot -Tpng ./reportes/arboljs.dot -o ./reportes/arboljs.png")
+        os.system("start ./reportes/arboljs.png")
+
     #END
     
 

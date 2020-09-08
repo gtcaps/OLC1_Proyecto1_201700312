@@ -56,5 +56,5 @@ class Token:
         elif self.tipoToken is TipoToken.COMA:
             return "Coma"
         else:
-            return "AND"
+            return "And"
 
