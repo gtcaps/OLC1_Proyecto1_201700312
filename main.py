@@ -11,8 +11,11 @@ from AnalizadorLexicoJS.AnalizadorLexico import AnalizadorLexicoJS
 # # analizadorJS.imprimirErrores()
 
 
-cadena = "c:\\hola\\mundo"
-# patron = r'([a-zA-Z]:\\)(\w+\\)+'
-# encontrar = re.search(patron, cadena.read())
-print(re.sub(r'[a-zA-Z]:\\','',cadena))
-pathlib.Path(re.sub(r'[a-zA-Z]:\\','',cadena)).mkdir(parents=True, exist_ok=True)
+# cadena = "c:\\hola\\mundo"
+# # patron = r'([a-zA-Z]:\\)(\w+\\)+'
+# # encontrar = re.search(patron, cadena.read())
+# print(re.sub(r'[a-zA-Z]:\\','',cadena))
+# pathlib.Path(re.sub(r'[a-zA-Z]:\\','',cadena)).mkdir(parents=True, exist_ok=True)
+frutas = ["melon", "pera", "manzana"]
+cadena = "la pera es verde"
+

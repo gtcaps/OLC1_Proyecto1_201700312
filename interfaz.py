@@ -93,6 +93,7 @@ def abrirArchivo():
         contenido = archivo.read()
         editor_texto.insert(END, contenido)
         label_nombre_archivo["text"] = os.path.basename(archivo.name)
+#END
 
 def nuevoArchivo():
     global archivo
@@ -117,6 +118,24 @@ def guardarArchivo():
 
 def guardarArchivoComo():
     pass
+#END
+
+def resaltarPalabra(id, palabras, color):
+    for palabra in palabras:
+        ini = 1.0
+        pos = visor_texto.search(palabra, ini, stopindex=END)
+        while pos:
+            longitud = len(palabra)
+            fil, col = pos.split('.')
+            fin = int(col) + longitud
+            fin = fil + '.' + str(fin)
+            visor_texto.tag_add("resaltar{}".format(id),pos, fin)
+            ini = fin
+            pos = visor_texto.search(palabra, ini, stopindex=END)
+        visor_texto.tag_config("resaltar{}".format(id), background="white", foreground="{}".format(color))
+#END
+
+
 
 def jsAnalizador():
     messagebox.showinfo(message="Analizar Archivo JS", title="Analizar Archivo")
@@ -136,10 +155,18 @@ def jsAnalizador():
     for error in analizadorJS.listaErrores:
         consola.insert(END, error + "\n")
 
+    # PINTAR
     visor_texto.insert(END, analizadorJS.entradaLimpia)
-    
 
-    
+    resaltarPalabra(1,analizadorJS.palabrasReservadas, "red")
+    resaltarPalabra(2,["+","-","*","/"], "#FA9000")      
+    resaltarPalabra(3,analizadorJS.numeros,"blue")
+    resaltarPalabra(4,analizadorJS.cadenas, "#E3CC10")
+    resaltarPalabra(5,analizadorJS.comentarios, "gray")
+    resaltarPalabra(6,analizadorJS.variables, "green")
+
+ #END   
+
 
 
 def analizarArchivo():

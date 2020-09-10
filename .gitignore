@@ -1,4 +1,4 @@
 /reportes
 /archivos_prueba
 *.pyc
-main.py
+./main.py

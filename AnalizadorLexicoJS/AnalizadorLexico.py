@@ -2,6 +2,7 @@ from AnalizadorLexicoJS.Token import *
 import os
 import re
 import pathlib
+from tkinter import *
 
 class AnalizadorLexicoJS:
 
@@ -15,6 +16,10 @@ class AnalizadorLexicoJS:
         self.linea = 1
         self.columna = 1
         self.palabrasReservadas = ["var","console","log","for","while","do","continue","break","return","constructor","this","pow","true","false", "if", "else"]
+        self.comentarios = []
+        self.cadenas = []
+        self.variables = []
+        self.numeros = ["True","False"]
 
     def __agregarToken(self, tipoToken):
         token = Token(tipoToken, self.lexema, self.linea, self.columna)
@@ -23,7 +28,7 @@ class AnalizadorLexicoJS:
         self.estado = 0
         self.lexema = ""
         
-
+        #AGREGAR AL REPORTE DEL ARBOL
         if token.getTipo() not in self.__tknsGrafica and token.getTipo() != "Palabra Reservada":
             self.__tknsGrafica.append(token.getTipo())
     #END
@@ -161,6 +166,7 @@ class AnalizadorLexicoJS:
                     self.estado = 3
                     self.lexema += caracterActual
                 else:
+                    self.numeros.append(self.lexema)
                     self.__agregarToken(TipoToken.NUMERO_ENTERO)
                     i -= 1
             elif self.estado == 3:
@@ -175,11 +181,13 @@ class AnalizadorLexicoJS:
                     self.estado = 4
                     self.lexema += caracterActual
                 else:
+                    self.numeros.append(self.lexema)
                     self.__agregarToken(TipoToken.NUMERO_DECIMAL)
                     i -= 1
             elif self.estado == 5:
                 if caracterActual == '"':
                     self.lexema += caracterActual
+                    self.cadenas.append(self.lexema)
                     self.__agregarToken(TipoToken.CADENA)
                 else:
                     self.estado = 5
@@ -187,6 +195,7 @@ class AnalizadorLexicoJS:
             elif self.estado == 6:
                 if caracterActual == '\'':
                     self.lexema += caracterActual
+                    self.cadenas.append(self.lexema)
                     self.__agregarToken(TipoToken.CARACTER)
                 else:
                     self.lexema += caracterActual
@@ -204,7 +213,9 @@ class AnalizadorLexicoJS:
             elif self.estado == 8:
                 if caracterActual == '\n' or i == (len(cadenaEntrada) - 1):
                     # COMENTARIO DE UNA LINEA
+                    self.lexema += caracterActual
                     print("ESTE ES UN COMENTARIO DE UNA LINEA => " + self.lexema)
+                    self.comentarios.append(self.lexema)
                     self.entradaLimpia += self.lexema
                     self.lexema = ""
                     self.estado = 0
@@ -223,8 +234,9 @@ class AnalizadorLexicoJS:
             elif self.estado == 10:
                 if caracterActual == '/':
                     #COMENTARIO MULTILINEA
-                    print("ESTE ES UN COMENTARIO MULTILINEA => \n" + self.lexema)
                     self.lexema += caracterActual
+                    print("ESTE ES UN COMENTARIO MULTILINEA => \n" + self.lexema)
+                    self.comentarios.append(self.lexema)
                     self.entradaLimpia += self.lexema
                     self.lexema = ""
                     self.estado = 0
@@ -259,6 +271,11 @@ class AnalizadorLexicoJS:
         file = open(".\\" + ruta + nombre_archivo, "w")
         file.write(self.entradaLimpia)
         file.close()
+
+        self.variables = re.findall(r'var [a-zA-Z_][a-zA-Z0-9_]*',self.entradaLimpia)
+        for i in range(0,len(self.variables)):
+            self.variables[i] = self.variables[i].replace("var ","")
+
 
     #END
 
@@ -407,4 +424,4 @@ class AnalizadorLexicoJS:
 
     #END
     
-
+    
