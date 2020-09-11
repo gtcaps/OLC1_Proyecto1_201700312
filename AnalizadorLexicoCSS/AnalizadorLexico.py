@@ -12,6 +12,10 @@ class AnalizadorLexicoCSS:
         self.lexema = ""
         self.linea = 1
         self.columna = 1
+        self.bitacora = []
+        self.comentarios = []
+        self.cadenas = []
+        self.numeros = []
         self.palabrasReservadasPropiedades = ["color","border","text-align","font-weight","padding-left","padding-top","line-height","margin-top","margin-left","display","top","float","min-width","background-color","opacity","font-family","font-size","padding-right","padding","width","margin-right","margin","position","right","url","background-image","background","font-style","font","height","margin-bottom","border-style","bottom","left","max-width","min-height","rgb","rgba"]
         self.palabrasReservadasUnidades = ["em","px","in","vh","vw","cm","mm","pt","pc","rem"]
     #END -------
@@ -30,6 +34,13 @@ class AnalizadorLexicoCSS:
         self.lexema = ""
     #END -------
 
+    def __agregarBitacora(self, token = None):
+        self.bitacora.append("| Estado {} | Lexema -> {} ".format(self.estado, self.lexema))
+        if token is not None:
+            self.bitacora.append("  -> Aceptando el token {}\n".format(token))
+    #END -------
+
+
     def analizarCadena(self, cadena):
         cadenaEntrada = cadena + "#"
         col = 0
@@ -43,75 +54,94 @@ class AnalizadorLexicoCSS:
                 col = 0
 
             if self.estado == 0:
+                self.__agregarBitacora()
                 if caracterActual.isalpha() or caracterActual == '_':
                     self.lexema += caracterActual
                     self.estado = 1
                     self.columna = col
+                    self.__agregarBitacora()
                 elif caracterActual.isdigit():
                     self.lexema += caracterActual
                     self.estado = 2
                     self.columa = col
+                    self.__agregarBitacora()
                 elif caracterActual == '-':
                     self.lexema += caracterActual
                     self.estado = 5
                     self.columna = col
+                    self.__agregarBitacora()
                 elif caracterActual == '#':
                     if i == (len(cadenaEntrada) - 1):
+                        self.bitacora.append(">>>>>>>>>>>> Fin del Analisis Lexico <<<<<<<<<<<<<")
                         print(">>>>>>>>>>>> Fin del Analisis Lexico <<<<<<<<<<<<<")
                     else:
                         self.lexema += caracterActual
                         self.estado = 6  
                         self.columna = col
+                        self.__agregarBitacora()
                 elif caracterActual == '"':
                     self.lexema += caracterActual
                     self.estado = 7
                     self.columa = col
+                    self.__agregarBitacora()
                 elif caracterActual == '/':
                     self.lexema += caracterActual
                     self.estado = 9
+                    self.__agregarBitacora()
                 elif caracterActual == '(':
                     self.lexema += caracterActual
                     self.columa = col
+                    self.__agregarBitacora(self.lexema)
                     self.__agregarToken(TipoToken.PARENTESIS_IZQ)
                 elif caracterActual == ')':
                     self.lexema += caracterActual
                     self.columa = col
+                    self.__agregarBitacora(self.lexema)
                     self.__agregarToken(TipoToken.PARENTESIS_DER)
                 elif caracterActual == ',':
                     self.lexema += caracterActual
                     self.columa = col
+                    self.__agregarBitacora(self.lexema)
                     self.__agregarToken(TipoToken.COMA)
                 elif caracterActual == '%':
                     self.lexema += caracterActual
                     self.columa = col
+                    self.__agregarBitacora(self.lexema)
                     self.__agregarToken(TipoToken.PORCENTAJE)
                 elif caracterActual == '{':
                     self.lexema += caracterActual
                     self.columa = col
+                    self.__agregarBitacora(self.lexema)
                     self.__agregarToken(TipoToken.LLAVE_IZQ)       
                 elif caracterActual == '}':
                     self.lexema += caracterActual
                     self.columa = col
+                    self.__agregarBitacora(self.lexema)
                     self.__agregarToken(TipoToken.LLAVE_DER)  
                 elif caracterActual == ':':
                     self.lexema += caracterActual
                     self.columa = col
+                    self.__agregarBitacora(self.lexema)
                     self.__agregarToken(TipoToken.DOS_PUNTOS)     
                 elif caracterActual == ';':
                     self.lexema += caracterActual
                     self.columa = col
+                    self.__agregarBitacora(self.lexema)
                     self.__agregarToken(TipoToken.PUNTO_Y_COMA)
                 elif caracterActual == '*':
                     self.lexema += caracterActual
                     self.columa = col
+                    self.__agregarBitacora(self.lexema)
                     self.__agregarToken(TipoToken.ASTERISCO)
                 elif caracterActual == '=':
                     self.lexema += caracterActual
                     self.columa = col
+                    self.__agregarBitacora(self.lexema)
                     self.__agregarToken(TipoToken.IGUAL)
                 elif caracterActual == '.':
                     self.lexema += caracterActual
                     self.columa = col
+                    self.__agregarBitacora(self.lexema)
                     self.__agregarToken(TipoToken.PUNTO)
                 else:
                     if caracterActual in ('\n',' ','\t'):
@@ -119,92 +149,122 @@ class AnalizadorLexicoCSS:
                         self.lexema = ""
                         self.entradaLimpia += caracterActual
                     else:
+                        self.bitacora.append("| Error lexico | El caracter {} no es reconocido".format(caracterActual))
                         self.__agregarErrorLexico("El caracter {} no es reconocido dentro del lenguaje".format(caracterActual))                    
             elif self.estado == 1:
                 if caracterActual.isalpha() or caracterActual.isdigit() or caracterActual in ["_", "-"]:
                     self.estado = 1
                     self.lexema += caracterActual
+                    self.__agregarBitacora()
                 else:
                     if self.lexema in self.palabrasReservadasPropiedades:
+                        self.__agregarBitacora("Propiedades")
                         self.__agregarToken(TipoToken.PROPIEDADES)
                     elif self.lexema in self.palabrasReservadasUnidades:
+                        self.__agregarBitacora("Unidades")
                         self.__agregarToken(TipoToken.UNIDADES)
                     else:
+                        self.__agregarBitacora("Identificador")
                         self.__agregarToken(TipoToken.IDENTIFICADOR)
                     i -= 1 
             elif self.estado == 2:
                 if caracterActual.isdigit():
                     self.estado = 2
                     self.lexema += caracterActual
+                    self.__agregarBitacora()
                 elif caracterActual == '.':
                     self.estado = 3
                     self.lexema += caracterActual
+                    self.__agregarBitacora()
                 else:
+                    self.__agregarBitacora("Numero")
+                    self.numeros.append(self.lexema)
                     self.__agregarToken(TipoToken.NUMERO)
                     i -= 1
             elif self.estado == 3:
                 if caracterActual.isdigit():
                     self.estado = 4
                     self.lexema += caracterActual
+                    self.__agregarBitacora()
                 else:
+                    self.bitacora.append("| Error Lexico | En el token {} se esperaba un digito y venia {}".format(self.lexema, caracterActual))
                     self.__agregarErrorLexico("Error Lexico: En el token {} se esperaba un digito y venia {}".format(self.lexema, caracterActual))
                     i -= 1
             elif self.estado == 4:
                 if caracterActual.isdigit():
                     self.estado = 4
                     self.lexema += caracterActual
+                    self.__agregarBitacora()
                 else:
+                    self.__agregarBitacora("Numero")
+                    self.numeros.append(self.lexema)
                     self.__agregarToken(TipoToken.NUMERO)
                     i -= 1
             elif self.estado == 5:
                 if caracterActual.isdigit():
                     self.estado = 2
                     self.lexema += caracterActual
+                    self.__agregarBitacora()
                 else:
                     self.estado = 0
-                    self.lexema 
+                    self.lexema
+                    self.__agregarBitacora() 
                     i -= 1
             elif self.estado == 6:
                 if caracterActual in ['1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']:
                     self.estado = 6
                     self.lexema += caracterActual
+                    self.__agregarBitacora()
                 else:
                     if len(self.lexema) == 1:
+                        self.__agregarBitacora(self.lexema)
                         self.__agregarToken(TipoToken.NUMERAL)
                     else:
+                        self.__agregarBitacora("Numero Hexadecimal")
+                        self.numeros.append(self.lexema)
                         self.__agregarToken(TipoToken.NUMERO_HEXADECIMAL)
                     i -= 1
             elif self.estado == 7:
                 if caracterActual == '"':
                     self.lexema += caracterActual
+                    self.cadenas.append(self.lexema)
+                    self.__agregarBitacora("Cadena")
                     self.__agregarToken(TipoToken.CADENA)
                 else:
                     self.estado = 7
                     self.lexema += caracterActual
+                    self.__agregarBitacora()
             elif self.estado == 9:
                 if caracterActual == '*':
                     self.estado = 10
                     self.lexema += caracterActual
+                    self.__agregarBitacora()
                 else:
+                    self.bitacora("| Error Lexico | En el comentario <{}> se esperaba un * y venia {}".format(self.lexema, caracterActual))
                     self.__agregarErrorLexico("Error Lexico: En el token {} se esperaba un * {} en el comentario".format(self.lexema, caracterActual))
                     i -= 1
             elif self.estado == 10:
                 if caracterActual == '*':
                     self.lexema += caracterActual
                     self.estado = 11
+                    self.__agregarBitacora()
                 else:
                     self.lexema += caracterActual
                     self.estado = 10
+                    self.__agregarBitacora()
             elif self.estado == 11:
                 if caracterActual == '/':
                     self.lexema += caracterActual
                     print("COMENTARIO => \n{}".format(self.lexema))
+                    self.comentarios.append(self.lexema)
                     self.entradaLimpia += self.lexema
+                    self.__agregarBitacora("Comentario")
                     self.lexema = ""
                     self.estado = 0
                 else:
                     self.lexema += caracterActual
                     self.estado = 10
+                    self.__agregarBitacora()
 
 
             i += 1

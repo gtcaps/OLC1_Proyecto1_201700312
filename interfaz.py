@@ -179,7 +179,15 @@ def jsAnalizador():
 
 def cssAnalizador():
     analizadorCSS = analizador("css")
-    resaltarPalabra(1,analizadorCSS.comentarios, "gray")
+    consola.delete("1.0", END)
+    for msg in analizadorCSS.bitacora:
+         consola.insert(END, "{}\n".format(msg))
+
+    resaltarPalabra(1,analizadorCSS.numeros,"blue")
+    resaltarPalabra(2,analizadorCSS.comentarios, "gray")
+    resaltarPalabra(3,analizadorCSS.cadenas, "#E3CC10")
+    resaltarPalabra(4,analizadorCSS.palabrasReservadasPropiedades, "red")
+    resaltarPalabra(5,analizadorCSS.palabrasReservadasUnidades, "red")
 #END -----
     
 
