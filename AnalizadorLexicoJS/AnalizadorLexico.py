@@ -2,7 +2,6 @@ from AnalizadorLexicoJS.Token import *
 import os
 import re
 import pathlib
-from tkinter import *
 
 class AnalizadorLexicoJS:
 
@@ -50,6 +49,7 @@ class AnalizadorLexicoJS:
             if caracterActual == '\n':
                 self.linea += 1
                 col = 0
+                
 
             if self.estado == 0:
                 if caracterActual.isalpha() or caracterActual == '_': #SI ES LETRA
@@ -260,7 +260,7 @@ class AnalizadorLexicoJS:
     #END
 
     def crearArchivoLimpio(self, nombre_archivo):
-        patron = r'([a-zA-Z]:\\)(\w+\\)+'
+        patron = r'([a-zA-Z]:\\)*(\w+\\)+'
         ruta = re.search(patron, self.entradaLimpia)
         ruta = ruta.group()
 
@@ -308,6 +308,9 @@ class AnalizadorLexicoJS:
         file.write("    <title>Reporte de Errores</title>\n")
         file.write("    <style>")
         file.write("        *{margin:0; padding:0; box-sizing: border-box;}\n")
+        file.write("        menu{background: rgb(27,38,68);text-align:center;padding:20px 0;}\n")
+        file.write("        a{margin: 0 30px; text-decoration:none; font-size:20px; color:white;}\n")
+        file.write("        a:hover{text-decoration: underline;}\n")
         file.write("        h1{text-align: center; margin: 30px 0;}\n")
         file.write("        table{border-collapse: collapse; margin: 0 auto; width: 40%;}\n")
         file.write("        td, th{border: 1px solid black; padding: 10px;}\n")
@@ -315,7 +318,11 @@ class AnalizadorLexicoJS:
         file.write("    </style>\n")
         file.write("</head>\n")
         file.write("<body>\n")
-        file.write("    <h1>Reporte de Errores Lexicos </h1>\n")
+        file.write("    <menu>\n")
+        file.write("        <a href=\"tokensjs.html\">Reporte Tokens</a>\n")
+        file.write("        <a href=\"erroresjs.html\">Reporte Errores</a>\n")
+        file.write("    </menu>\n")
+        file.write("    <h1>Reporte de Errores Lexicos JS</h1>\n")
         file.write("    <table>\n")
         file.write("        <thead>\n")
         file.write("            <tr>\n")
@@ -345,7 +352,70 @@ class AnalizadorLexicoJS:
         file.write("</html>")
         file.close()
 
+        self.__generarReporteTokens()
+
         os.system("start ./reportes/erroresjs.html")
+    #END
+
+    def __generarReporteTokens(self):
+        self.__verificarDirectorioReportes()
+
+        file = open("reportes/tokensjs.html", "w")
+        file.write("<!DOCTYPE html>\n<html>\n")
+        file.write("<head>\n")
+        file.write("    <meta charset=\"UTF-8\">\n")
+        file.write("    <title>Reporte de Tokens JS</title>\n")
+        file.write("    <style>")
+        file.write("        *{margin:0; padding:0; box-sizing: border-box;}\n")
+        file.write("        menu{background: rgb(27,38,68);text-align:center;padding:20px 0;}\n")
+        file.write("        a{margin: 0 30px; text-decoration:none; font-size:20px; color:white;}\n")
+        file.write("        a:hover{text-decoration: underline;}\n")
+        file.write("        h1{text-align: center; margin: 30px 0;}\n")
+        file.write("        table{border-collapse: collapse; margin: 0 auto; width: 40%;}\n")
+        file.write("        td, th{border: 1px solid black; padding: 10px;}\n")
+        file.write("       th{background: black; color: white}\n")
+        file.write("    </style>\n")
+        file.write("</head>\n")
+        file.write("<body>\n")
+        file.write("    <menu>\n")
+        file.write("        <a href=\"tokensjs.html\">Reporte Tokens</a>\n")
+        file.write("        <a href=\"erroresjs.html\">Reporte Errores</a>\n")
+        file.write("    </menu>\n")
+        file.write("    <h1>Reporte de Tokens JS</h1>\n")
+        file.write("    <table>\n")
+        file.write("        <thead>\n")
+        file.write("            <tr>\n")
+        file.write("                <th>#</th>\n")
+        file.write("                <th>Token</th>\n")
+        file.write("                <th>Lexema</th>\n")
+        file.write("                <th>Fila</th>\n")
+        file.write("                <th>Columna</th>\n")
+        file.write("            </tr>\n")
+        file.write("        </thead>\n")
+        file.write("        <tbody>")
+
+        if len(self.listaTokens) != 0:
+            i = 1
+            for token in self.listaTokens:
+                file.write("            <tr>")
+                file.write("                <td>{}</td>".format(i))
+                file.write("                <td>{}</td>".format(token.getTipo()))
+                file.write("                <td>{}</td>".format(token.lexema))
+                file.write("                <td>{}</td>".format(token.linea))
+                file.write("                <td>{}</td>".format(token.columna))
+                file.write("            </tr>")
+                i += 1
+        else:
+            file.write("            <tr>")
+            file.write("                <td>0</td>")
+            file.write("                <td>El archivo no tiene tokens :D</td>")
+            file.write("            </tr>")
+
+        file.write("        </tbody>")
+        file.write("    </table>\n")
+        file.write("</body>\n")
+        file.write("</html>")
+        file.close()
     #END
 
     def generarReporteArbol(self):
