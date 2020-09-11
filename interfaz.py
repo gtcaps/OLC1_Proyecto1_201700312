@@ -2,6 +2,7 @@ import os
 from tkinter import *
 from tkinter import filedialog, messagebox
 from AnalizadorLexicoJS.AnalizadorLexico import AnalizadorLexicoJS
+from AnalizadorLexicoCSS.AnalizadorLexico import AnalizadorLexicoCSS
 
 archivo = None
 
@@ -135,28 +136,38 @@ def resaltarPalabra(id, palabras, color):
         visor_texto.tag_config("resaltar{}".format(id), background="white", foreground="{}".format(color))
 #END
 
+def analizador(tipo):
+    analizadorLexico = None
+    if tipo == "js":
+        analizadorLexico = AnalizadorLexicoJS()
+        messagebox.showinfo(message="Analizar Archivo JS", title="Analizar Archivo")
+    elif tipo == "css":
+        analizadorLexico = AnalizadorLexicoCSS()
+        messagebox.showinfo(message="Analizar Archivo CSS", title="Analizar Archivo")
 
+    if analizadorLexico is not None:
+        analizadorLexico.analizarCadena(editor_texto.get("1.0", END))
+        analizadorLexico.generarReporteErrores()
+        analizadorLexico.crearArchivoLimpio(label_nombre_archivo.cget("text"))
+
+        for token in analizadorLexico.listaTokens:
+            consola.insert(END, "=====================================================\n")
+            consola.insert(END, "Token: {}  Lexema: {}  Linea: {}  Columna: {}\n".format(token.getTipo(), token.lexema, token.linea, token.columna))
+            consola.insert(END, "=====================================================\n")
+
+        consola.insert(END, "\n"*3)
+
+        for error in analizadorLexico.listaErrores:
+            consola.insert(END, error + "\n")
+        
+        visor_texto.insert(END, analizadorLexico.entradaLimpia)
+
+        return analizadorLexico
+#END -----
 
 def jsAnalizador():
-    messagebox.showinfo(message="Analizar Archivo JS", title="Analizar Archivo")
-    analizadorJS = AnalizadorLexicoJS()
-    analizadorJS.analizarCadena(editor_texto.get("1.0",END))
-    analizadorJS.generarReporteErrores()
+    analizadorJS = analizador("js")
     analizadorJS.generarReporteArbol()
-    analizadorJS.crearArchivoLimpio(label_nombre_archivo.cget("text"))
-
-    for token in analizadorJS.listaTokens:
-        consola.insert(END, "=====================================================\n")
-        consola.insert(END, "Token: {}  Lexema: {}  Linea: {}  Columna: {}\n".format(token.getTipo(), token.lexema, token.linea, token.columna))
-        consola.insert(END, "=====================================================\n")
-
-    consola.insert(END, "\n"*3)
-
-    for error in analizadorJS.listaErrores:
-        consola.insert(END, error + "\n")
-
-    # PINTAR
-    visor_texto.insert(END, analizadorJS.entradaLimpia)
 
     resaltarPalabra(1,analizadorJS.palabrasReservadas, "red")
     resaltarPalabra(2,["+","-","*","/"], "#FA9000")      
@@ -164,8 +175,13 @@ def jsAnalizador():
     resaltarPalabra(4,analizadorJS.cadenas, "#E3CC10")
     resaltarPalabra(5,analizadorJS.comentarios, "gray")
     resaltarPalabra(6,analizadorJS.variables, "green")
+#END -----
 
- #END   
+def cssAnalizador():
+    analizadorCSS = analizador("css")
+    resaltarPalabra(1,analizadorCSS.comentarios, "gray")
+#END -----
+    
 
 
 
@@ -174,6 +190,9 @@ def analizarArchivo():
         if ".js" in archivo.name:
             limpiarConsola()
             jsAnalizador()
+        elif ".css" in archivo.name:
+            limpiarConsola()
+            cssAnalizador()
     else:
         messagebox.showwarning(message="Elija un archivo para poder analizar", title="Analizar Archivo")
 

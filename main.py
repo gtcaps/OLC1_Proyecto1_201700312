@@ -1,6 +1,7 @@
 import re
 import pathlib
 from AnalizadorLexicoJS.AnalizadorLexico import AnalizadorLexicoJS
+from AnalizadorLexicoCSS.AnalizadorLexico import AnalizadorLexicoCSS
 
 
 # # ====ANALIZADOR PARA JAVASCRIPT
@@ -16,6 +17,10 @@ from AnalizadorLexicoJS.AnalizadorLexico import AnalizadorLexicoJS
 # # encontrar = re.search(patron, cadena.read())
 # print(re.sub(r'[a-zA-Z]:\\','',cadena))
 # pathlib.Path(re.sub(r'[a-zA-Z]:\\','',cadena)).mkdir(parents=True, exist_ok=True)
-frutas = ["melon", "pera", "manzana"]
-cadena = "la pera es verde"
 
+analizadorCSS = AnalizadorLexicoCSS()
+analizadorCSS.analizarArchivo("archivos_prueba/archivo.css")
+analizadorCSS.imprimirTokens()
+print("\n\n\n")
+analizadorCSS.imprimirErrores()
+analizadorCSS.generarReporteErrores()
