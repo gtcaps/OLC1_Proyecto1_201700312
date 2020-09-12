@@ -314,7 +314,7 @@ class AnalizadorLexicoCSS:
     def generarReporteErrores(self):
         self.__verificarDirectorioReportes()
 
-        file = open("reportes/erroresjs.html", "w")
+        file = open("reportes/errorescss.html", "w")
         file.write("<!DOCTYPE html>\n<html>\n")
         file.write("<head>\n")
         file.write("    <meta charset=\"UTF-8\">\n")

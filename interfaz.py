@@ -219,16 +219,3 @@ ventana.config(menu=menu_principal)
 
 
 ventana.mainloop()
-
-
-# #POSIBLE SOLUCION PARA PINTAR
-# # palabra = "es"
-# # editor_texto.tag_config("start", background="black", foreground="red")
-# # pos = editor_texto.search(palabra, "1.0", stopindex=END)
-# # print(pos)
-
-# # if pos:
-# #     end_pos = "{}+{}c".format(pos, len(palabra))
-# #     print("{}".format(end_pos))
-# #     editor_texto.tag_add("resaltar", pos, end_pos)
-# #     editor_texto.tag_config("resaltar", foreground="red")
