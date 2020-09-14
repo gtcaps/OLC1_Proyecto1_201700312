@@ -45,3 +45,13 @@ class Token:
             return "Cadena"
         elif self.tipoToken == TipoToken.UNIDADES:
             return "Unidades"
+        elif self.tipoToken == TipoToken.DIVISION:
+            return "Divison"
+        elif self.tipoToken == TipoToken.RESTA:
+            return "Resta"
+        elif self.tipoToken == TipoToken.SUMA:
+            return "Suma"
+        elif self.tipoToken == TipoToken.MAYOR:
+            return "Mayor"
+        elif self.tipoToken == TipoToken.MENOR:
+            return "Menor"

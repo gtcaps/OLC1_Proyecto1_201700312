@@ -143,6 +143,26 @@ class AnalizadorLexicoCSS:
                     self.columa = col
                     self.__agregarBitacora(self.lexema)
                     self.__agregarToken(TipoToken.PUNTO)
+                elif caracterActual == '+':
+                    self.lexema += caracterActual
+                    self.columna = col
+                    self.__agregarBitacora(self.lexema)
+                    self.__agregarToken(TipoToken.SUMA)
+                elif caracterActual == '-':
+                    self.lexema += caracterActual
+                    self.columna = col
+                    self.__agregarBitacora(self.lexema)
+                    self.__agregarToken(TipoToken.RESTA)
+                elif caracterActual == '>':
+                    self.lexema += caracterActual
+                    self.columna = col
+                    self.__agregarBitacora(self.lexema)
+                    self.__agregarToken(TipoToken.MAYOR)
+                elif caracterActual == '<':
+                    self.lexema += caracterActual
+                    self.columna = col
+                    self.__agregarBitacora(self.lexema)
+                    self.__agregarToken(TipoToken.MENOR)
                 else:
                     if caracterActual in ('\n',' ','\t'):
                         self.estado = 0
@@ -211,7 +231,7 @@ class AnalizadorLexicoCSS:
                     self.__agregarBitacora() 
                     i -= 1
             elif self.estado == 6:
-                if caracterActual in ['1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']:
+                if caracterActual.lower() in ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']:
                     self.estado = 6
                     self.lexema += caracterActual
                     self.__agregarBitacora()
@@ -220,9 +240,18 @@ class AnalizadorLexicoCSS:
                         self.__agregarBitacora(self.lexema)
                         self.__agregarToken(TipoToken.NUMERAL)
                     else:
-                        self.__agregarBitacora("Numero Hexadecimal")
-                        self.numeros.append(self.lexema)
-                        self.__agregarToken(TipoToken.NUMERO_HEXADECIMAL)
+                        if re.search(r'#[0-9a-fA-F]{3,6}', self.lexema):
+                            self.__agregarBitacora("Numero Hexadecimal")
+                            self.numeros.append(self.lexema)
+                            self.__agregarToken(TipoToken.NUMERO_HEXADECIMAL)
+                        else:
+                            splt = self.lexema.replace("#","")
+                            self.lexema = "#"
+                            self.__agregarBitacora(self.lexema)
+                            self.__agregarToken(TipoToken.NUMERAL)
+                            i -= len(splt)
+
+
                     i -= 1
             elif self.estado == 7:
                 if caracterActual == '"':
@@ -240,8 +269,7 @@ class AnalizadorLexicoCSS:
                     self.lexema += caracterActual
                     self.__agregarBitacora()
                 else:
-                    self.bitacora("| Error Lexico | En el comentario <{}> se esperaba un * y venia {}".format(self.lexema, caracterActual))
-                    self.__agregarErrorLexico("Error Lexico: En el token {} se esperaba un * {} en el comentario".format(self.lexema, caracterActual))
+                    self.__agregarToken(TipoToken.DIVISION)
                     i -= 1
             elif self.estado == 10:
                 if caracterActual == '*':

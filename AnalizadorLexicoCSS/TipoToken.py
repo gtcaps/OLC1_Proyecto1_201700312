@@ -19,5 +19,9 @@ class TipoToken(Enum):
     PARENTESIS_DER = auto()
     IGUAL = auto()
     CADENA = auto()
-    
+    DIVISION = auto()
+    RESTA = auto()
+    SUMA = auto()   
+    MAYOR = auto()
+    MENOR = auto() 
 
