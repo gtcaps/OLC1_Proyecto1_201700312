@@ -321,10 +321,12 @@ class AnalizadorLexicoCSS:
     #END -------
 
     def crearArchivoLimpio(self, nombre_archivo):
-        patron = r'([a-zA-Z]:\\)*(\w+\\)+'
+        # patron = r'([a-zA-Z]:\\)*(\w+\\)+'
+        patron = r'(PATHW)[: ]+([a-zA-Z]:\\)*(\w+\\)+'
         ruta = re.search(patron, self.entradaLimpia)
         ruta = ruta.group()
 
+        ruta = re.sub(r'(PATHW)[: ]+',"",ruta)
         ruta = re.sub(r'[a-zA-Z]:\\','',ruta)
         ruta = ruta.replace("user\\","")
         pathlib.Path(ruta).mkdir(parents=True, exist_ok=True)
