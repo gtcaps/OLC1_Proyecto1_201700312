@@ -3,6 +3,7 @@ from tkinter import *
 from tkinter import filedialog, messagebox
 from AnalizadorLexicoJS.AnalizadorLexico import AnalizadorLexicoJS
 from AnalizadorLexicoCSS.AnalizadorLexico import AnalizadorLexicoCSS
+from AnalizadorLexicoHTML.AnalizadorLexico import AnalizadorLexicoHTML
 
 archivo = None
 
@@ -144,11 +145,19 @@ def analizador(tipo):
     elif tipo == "css":
         analizadorLexico = AnalizadorLexicoCSS()
         messagebox.showinfo(message="Analizar Archivo CSS", title="Analizar Archivo")
+    elif tipo == "html":
+        analizadorLexico = AnalizadorLexicoHTML()
+        messagebox.showinfo(message="Analizar Archivo HTML", title="Analizar Archivo")
+
 
     if analizadorLexico is not None:
         analizadorLexico.analizarCadena(editor_texto.get("1.0", END))
         analizadorLexico.generarReporteErrores()
-        analizadorLexico.crearArchivoLimpio(label_nombre_archivo.cget("text"))
+        try:
+            analizadorLexico.crearArchivoLimpio(label_nombre_archivo.cget("text"))
+        except:
+            messagebox.showinfo(message="No se puede crear el archivo limpio, agrege una ruta", title="Analizar Archivo")
+
 
         for token in analizadorLexico.listaTokens:
             consola.insert(END, "=====================================================\n")
@@ -189,6 +198,10 @@ def cssAnalizador():
     resaltarPalabra(4,analizadorCSS.palabrasReservadasPropiedades, "red")
     resaltarPalabra(5,analizadorCSS.palabrasReservadasUnidades, "red")
 #END -----
+
+def htmlAnalizador():
+    analizadorHTML = analizador("html")
+#END -----
     
 
 
@@ -201,6 +214,9 @@ def analizarArchivo():
         elif ".css" in archivo.name:
             limpiarConsola()
             cssAnalizador()
+        elif ".html" in archivo.name:
+            limpiarConsola()
+            htmlAnalizador()
     else:
         messagebox.showwarning(message="Elija un archivo para poder analizar", title="Analizar Archivo")
 
