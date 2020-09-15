@@ -12,7 +12,7 @@ class AnalizadorLexicoHTML:
         self.columna = 1
         self.comentarios = []
         self.cadenas = []
-        self.palabrasReservadas = ["html","head","title","bode","h1","h2","h3","h4","h5","h6","p","br","img","src","id","class","a","href","ul","ol","li","style","table","thead","tbody","th","tr","td","caption","colgroup","col","tfoot","border"]
+        self.palabrasReservadas = ["html","head","title","bode","h1","h2","h3","h4","h5","h6","p","br","img","src","id","class","a","href","ul","ol","li","style","table","thead","tbody","th","tr","td","caption","colgroup","col","tfoot","border","body","div","footer"]
     #END -----
 
     def __agregarToken(self, tipoToken):
@@ -106,6 +106,7 @@ class AnalizadorLexicoHTML:
                 if caracterActual == '>':
                     self.lexema += caracterActual
                     print("COMENTARIO =>\n{}".format(self.lexema))
+                    self.comentarios.append(self.lexema)
                     self.entradaLimpia += self.lexema
                     self.lexema = ""
                     self.estado = 0

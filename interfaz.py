@@ -201,6 +201,13 @@ def cssAnalizador():
 
 def htmlAnalizador():
     analizadorHTML = analizador("html")
+
+    resaltarPalabra(1, analizadorHTML.palabrasReservadas, "red")
+    resaltarPalabra(2, analizadorHTML.comentarios, "gray")
+    resaltarPalabra(3, analizadorHTML.cadenas, "#E3CC10")
+    resaltarPalabra(4, re.findall(r'>.*<', visor_texto.get("1.0", END)), "black")
+
+
 #END -----
     
 
