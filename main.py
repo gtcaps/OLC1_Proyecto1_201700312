@@ -5,6 +5,7 @@ from AnalizadorLexicoJS.AnalizadorLexico import AnalizadorLexicoJS
 from AnalizadorLexicoCSS.AnalizadorLexico import AnalizadorLexicoCSS
 from AnalizadorLexicoHTML.AnalizadorLexico import AnalizadorLexicoHTML
 from AnalizadorRMT.AnalizadorLexico import AnalizadorLexicoRMT
+from AnalizadorRMT.AnalizadorSintactico import AnalizadorSintactico
 
 archivo = None
 
@@ -80,6 +81,7 @@ consola_scroll.config(command=consola.yview)
 ####################################################
 def limpiarConsola():
     consola.delete("1.0",END)
+    visor_texto.delete("1.0", END)
 
 def limpiarEditor():
     editor_texto.delete("1.0", END)
@@ -120,7 +122,12 @@ def guardarArchivo():
         f.close()
 
 def guardarArchivoComo():
-    pass
+    global archivo
+    texto = editor_texto.get("1.0", END)
+    archivo = filedialog.asksaveasfile(filetypes=[("JS Files","*.js"),("HTML Files","*.html"),("CSS Files","*.css"),("RMT Files","*.rmt")])
+    label_nombre_archivo["text"] = os.path.basename(archivo.name)
+    archivo.write(texto)
+    archivo.close()
 #END
 
 def resaltarPalabra(id, palabras, color):
@@ -215,6 +222,68 @@ def htmlAnalizador():
 
 def rmtAnalizador():
     analizadorRMT = analizador("rmt")
+    # analizadorSintacticoRMT = AnalizadorSintactico()
+    # analizadorSintacticoRMT.analizar(analizadorRMT.listaTokens)
+
+    lineas = visor_texto.get("1.0", END).strip().split("\n")
+    cad = ""
+    
+    for linea in lineas:
+        rmt_lex = AnalizadorLexicoRMT()
+        rmt_lex.analizarCadena(linea)
+
+        rmt_sin = AnalizadorSintactico()
+        rmt_sin.analizar(rmt_lex.listaTokens)
+
+        if rmt_sin.error:
+            cad += "            <tr>"
+            cad += ("                <td>{}</td>".format(linea))                
+            cad += ("                <td>{}</td>".format("INCORRECTO"))
+            cad += ("            </tr>") 
+        else:
+            cad += "            <tr>"
+            cad += ("                <td>{}</td>".format(linea))                
+            cad += ("                <td>{}</td>".format("CORRECTO"))
+            cad += ("            </tr>") 
+
+    if not os.path.isdir("reportes/"):
+        os.mkdir("reportes/")
+    
+
+    file = open("reportes/sintacticormt.html", "w")
+    file.write("<!DOCTYPE html>\n<html>\n")
+    file.write("<head>\n")
+    file.write("    <meta charset=\"UTF-8\">\n")
+    file.write("    <title>Reporte Sintactico</title>\n")
+    file.write("    <style>")
+    file.write("        *{margin:0; padding:0; box-sizing: border-box;}\n")
+    file.write("        h1{text-align: center; margin: 30px 0;}\n")
+    file.write("        table{border-collapse: collapse; margin: 0 auto; width: 40%;}\n")
+    file.write("        td, th{border: 1px solid black; padding: 10px;}\n")
+    file.write("       th{background: black; color: white}\n")
+    file.write("    </style>\n")
+    file.write("</head>\n")
+    file.write("<body>\n")
+    file.write("    <h1>Reporte de Analisis Sintactico</h1>\n")
+    file.write("    <table>\n")
+    file.write("        <thead>\n")
+    file.write("            <tr>\n")
+    file.write("                <th>Operacion</th>\n")
+    file.write("                <th>Resultado</th>\n")
+    file.write("            </tr>\n")
+    file.write("        </thead>\n")
+    file.write("        <tbody>")
+
+    file.write("        {}".format(cad))
+
+    file.write("        </tbody>")
+    file.write("    </table>\n")        
+    file.write("</body>\n")
+    file.write("</html>")
+    file.close()
+
+    os.system("start ./reportes/sintacticormt.html")
+    
 #END -----
     
 
@@ -246,7 +315,6 @@ menu_principal.add_command(label="Abrir", command=abrirArchivo)
 menu_principal.add_command(label="Guardar", command=guardarArchivo)
 menu_principal.add_command(label="Guardar Como")
 menu_principal.add_command(label="Analizar", command=analizarArchivo)
-menu_principal.add_command(label="Reportes")
 menu_principal.add_command(label="Salir", command=salirVentana)
 ventana.config(menu=menu_principal)
 
